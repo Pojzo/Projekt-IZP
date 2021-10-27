@@ -571,6 +571,7 @@ bool FirstRule(const char *password, uint password_len)
 
 bool SecondRule(const char *password, uint password_len, uint x)
 {				// Heslo musi splnat aspon x podmienok specifikovanych v zadani 
+    x = min(x, 4);
     uint passed = 0;
     // skontrolujeme vsetky podmienky
     passed =

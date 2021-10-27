@@ -4,7 +4,7 @@
 # Vytvoril Josef Kuchar (xkucha28) - josefkuchar.com
 # Priklad pouziti: ./test.py pwcheck
 # Help se vypise pres argument -h
-# Revize: 6
+# Revize: 8
 
 from subprocess import run, PIPE
 import sys
@@ -108,7 +108,7 @@ if __name__ == '__main__':
     t1.test('Test na LEVEL 2 #2', ['2', '2'], 'Aa\n', 'Aa\n')
     t1.test('Test na LEVEL 2 #3', ['2', '2'], 'Zz\n', 'Zz\n')
     t1.test('Test na LEVEL 2 #4', ['2', '4'], '%aZ0\n', '%aZ0\n')
-    t1.test('Test na LEVEL 2 #5', ['2', '5'], '%aZ0\n', '')
+    t1.test('Test na LEVEL 2 #5', ['2', '5'], '%aZ0\n', '%aZ0\n')
     t1.test('Test na LEVEL 2 #6', ['2', '4'], 'aZ0\n', '')
     t1.test('Test na LEVEL 2 #7', ['2', '3'], 'aZ0\n', 'aZ0\n')
     t1.test('Test na LEVEL 2 #8', ['2', '4'], 'Aa 0\n', 'Aa 0\n')
@@ -117,6 +117,8 @@ if __name__ == '__main__':
     t1.test('Test na LEVEL 3 #3', ['3', '2'], 'AAa\n', '')
     t1.test('Test na LEVEL 3 #4', ['3', '4'], 'Az0!!!\n', 'Az0!!!\n')
     t1.test('Test na LEVEL 3 #5', ['3', '4'], 'Az0!!!!\n', '')
+    t1.test('Test na LEVEL 3 #6', ['3', '5'], 'Az0!!!!\n', 'Az0!!!!\n')
+    t1.test('Test na LEVEL 3 #7', ['3', '5'], 'Az0!!!!!\n', '')
     t1.test('Test na LEVEL 4 #1', ['4', '1'], 'Aa\n', '')
     t1.test('Test na LEVEL 4 #2', ['4', '2'], 'Aaha\n', 'Aaha\n')
     t1.test('Test na LEVEL 4 #3', ['4', '2'], 'Abhaha\n', '')
@@ -126,6 +128,9 @@ if __name__ == '__main__':
     t1.test('Test na LEVEL 4 #7', ['4', '4'], '%aZ0x%aZ\n', '%aZ0x%aZ\n')
     t1.test('Test na LEVEL 4 #8', ['4', '4'], '%aZ0x%aZ0\n', '')
     t1.test('Test na LEVEL 4 #9', ['4', '4'], '%aZ0hahaha\n', '')
+    t1.test('Test na LEVEL 4 #10', ['4', '5'], '%aZ0hahaha\n', '%aZ0hahaha\n')
+    t1.test('Test na LEVEL 4 #11', ['4', '5'], '%aZ0hahahah\n', '')
+    t1.test('Test na LEVEL 4 #12', ['4', '5'], 'hahah%aZ0hahah\n', '')
     # Pocet argumentu
     t1.test('Nedostatecny pocet argumentu', ['1'], HESLA_TXT, intentional_error=True)
     t1.test('Prilis mnoho argumentu', ['1', '1', '--stats', '1'], HESLA_TXT, intentional_error=True)
@@ -144,11 +149,11 @@ if __name__ == '__main__':
     t1.test('Druhy argument mimo rozsah #1: 0', ['1', '0'], HESLA_TXT, intentional_error=True)
     t1.test('Druhy argument mimo rozsah #2: -2000000000', ['1', '-2000000000'], HESLA_TXT, intentional_error=True)
     t1.test('Druhy argument mimo rozsah #3: mensi nez LONG_MIN', ['1', '-10223372036854775807'], HESLA_TXT, intentional_error=True)
-    t1.test('Druhy argument velky: vetsi nez LONG_MAX', ['2', '10223372036854775807'], HESLA_TXT, '')
+    t1.test('Druhy argument velky: vetsi nez LONG_MAX', ['4', '10223372036854775807'], HESLA_TXT, 'IZP2021:fit@vut.cz\n')
     # Testovani parsovani tretiho argumentu
     t1.test('Treti argument (--stats) neplatny #1: --haha', ['1', '1', '--haha'], HESLA_TXT, intentional_error=True)
     t1.test('Treti argument (--stats) neplatny #2: --statshaha', ['1', '1', '--statshaha'], HESLA_TXT, intentional_error=True)
-    t1.test('Treti argument (--stats) neplatny #3: stats', ['1', '1', '--statshaha'], HESLA_TXT, intentional_error=True)
+    t1.test('Treti argument (--stats) neplatny #3: stats', ['1', '1', 'stats'], HESLA_TXT, intentional_error=True)
     # Testovani ruznych moznosti vstupu
     t1.test('Maximalni delka hesla', ['1', '1', '--stats'], 'A' * 100 +'\n', 'Statistika:\nRuznych znaku: 1\nMinimalni delka: 100\nPrumerna delka: 100.0\n')
     t1.test('Heslo prilis dlouhe #1: 101', ['1', '1'], 'A' * 101 + '\n', intentional_error=True)
