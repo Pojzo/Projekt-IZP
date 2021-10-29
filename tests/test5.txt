@@ -1,5 +1,0 @@
-IZP2021:fit@vut.cz
-Statistika:
-Ruznych znaku: 36
-Minimalni delka: 8
-Prumerna delka: 14.4
