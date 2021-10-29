@@ -14,8 +14,7 @@
 #define BUFFER_LENGTH            102	// buffer lengths for storing password
 #define MIN_LEVEL                1	// minimum value for argument 'level'
 #define MAX_LEVEL                4	// maximum value for argument 'level'
-#define MIN_PARAM                0	// minimum value for argument 'param'
-#define MAX_PARAM                100	// maximum value for argument 'param'
+#define MIN_PARAM                1	// minimum value for argument 'param'
 #define STATS_FLAG               "--stats"	// optional argument
 #define NUM_ASCII_CHARACTERS     126	// number of characters in ascii table we are working with
 #define SPECIAL_CHARACTERS_START 32	// character that begins special characters according to the definition
@@ -30,7 +29,6 @@
 typedef unsigned int uint;
 typedef unsigned long ulong;
 
-
 struct Level {
     uint value;
     uint min_value;
@@ -40,7 +38,6 @@ struct Level {
 struct Param {
     ulong value;
     uint min_value;
-    ulong max_value;
 };
 
 struct Stats {
@@ -52,7 +49,7 @@ struct Stats {
     float average_length;
     bool chars[NUM_ASCII_CHARACTERS];
     /* chars is a bool of chars, that are all intitialized with value false
-       while the program is running, we're settings chars[char] true, kde char je charakter zo zadaneho hesla
+       while the program is running, we're settings chars[char] true, where char is character from password
        for example: 'heslo'; function updateStats does-> stats.chars[104] = true;  'h'
                                                         stats.chars[101] = true;  'e'
                                                         stats.chars[115] = true;  's' 
@@ -66,9 +63,8 @@ struct Stats {
 struct Arguments {
     struct Level level;
     struct Param param;
-    struct Stats stats;
     bool correct;
-    bool optional;
+    bool print_stats;
 };
 // function prototypes
 
@@ -77,7 +73,6 @@ struct Arguments CheckArguments(int argc, const char** argv);	// function loads 
 
 struct Level CreateDefaultLevel();	// function returns struct Level with default values
 struct Param CreateDefaultParam();	// function returns struct Param with default values
-struct Stats CreateDefaultStats();
 struct Arguments IncorrectArguments(struct Arguments arguments, const char *message);	// function returns struct Arguments with attribute correct = false and prints a warning message
 struct Arguments CreateArguments(int, const char **);
 
@@ -112,7 +107,7 @@ bool ThirdRule(const char *password, uint password_length, uint param);
 bool FourthRule(const char *password, uint password_length, uint param);
 
 // Stats
-struct Stats CreateStats();	// function returns default stats
+struct Stats CreateDefaultStats();
 void UpdateStats(struct Stats *, const char *password, uint password_length);	// function upadates stats with a new password
 void CountDistinctCharacters(struct Stats *);	// function calculates number of distinct characters
 void PrintStats(struct Stats);	// function prints stats
@@ -129,7 +124,7 @@ int main(int argc, const char **argv)
         return 1;
     }
 
-    if (arguments.stats.print) {
+    if (arguments.print_stats) {
         return CheckPasswordsWStats(arguments);
     }
     return CheckPasswordsWOStats(arguments);
@@ -161,7 +156,7 @@ bool CorrectParamArgument(const char *string_param, struct Param param)
         return false;
     }
     uint param_int = atoi(string_param);
-    if (param_int < 1) {
+    if (param_int < param.min_value) {
         return false;
     }
     return true;
@@ -187,7 +182,6 @@ struct Param CreateDefaultParam()
     struct Param param;
     param.value = DEFAULT_PARAM;
     param.min_value = MIN_PARAM;
-    param.max_value = MAX_PARAM;
 
     return param;
 }
@@ -248,7 +242,7 @@ struct Arguments HandlePositionalArguments(struct Arguments arguments, int argc,
     }
     if (argc == MAX_ARGUMENTS) {
         if (CorrectStatsArgument(argv[3])) {
-            arguments.stats.print = true;
+            arguments.print_stats = true;
         } else {
             sprintf(error_message, "Neznamy argument %s", argv[3]);
             return IncorrectArguments(arguments, error_message);
@@ -266,7 +260,7 @@ struct Arguments HandleOptionalArguments(struct Arguments arguments, int argc,
     char error_message[100];
     for (int i = 1; i < argc; i++) {
         if (CorrectStatsArgument(argv[i])) {
-            arguments.stats.print = true;
+            arguments.print_stats = true;
 
         } else {
             if (StringsEqual(argv[i], LEVEL_SWITCH)
@@ -315,7 +309,7 @@ struct Arguments CheckArguments(int argc, const char **argv)
 
     arguments.level = level;
     arguments.param = param;
-    arguments.stats = stats;
+    stats = stats;
 
     char error_message[ERROR_MSG_LEN];
     
@@ -325,9 +319,9 @@ struct Arguments CheckArguments(int argc, const char **argv)
     } else if (argc == 2) {
         // if number of arguments is two and argument is --stats, return arguments with default values
         if (StringsEqual(argv[1], STATS_FLAG)) {
-            arguments.stats.print = true;
+            stats.print = true;
         } else {
-            sprintf(error_message, "Incorrect argument ",
+            sprintf(error_message, "Incorrect argument %s",
                     argv[1]);
             return IncorrectArguments(arguments, error_message);
         }
@@ -513,7 +507,7 @@ bool ContainsDuplicateSubstring(char substrings[][BUFFER_LENGTH],
 {
     // brute force approach
     for (uint i = 0; i < num_substrings; i++) {
-        for (uint j = 0; j < num_substrings; j++) {
+        for (uint j = i; j < num_substrings; j++) {
             if (i == j) {
                 continue;
             }
@@ -618,6 +612,7 @@ int CheckPasswordsWStats(struct Arguments arguments)
     char buffer[BUFFER_LENGTH];	// buffer for storing passwords
     uint password_length;	
     bool passed;		// variable determining whether a password passed all rules
+    struct Stats stats = CreateDefaultStats();
 
     while (fgets(buffer, BUFFER_LENGTH, stdin)) {
         password_length = StringLength(buffer);
@@ -627,24 +622,24 @@ int CheckPasswordsWStats(struct Arguments arguments)
         }
 
         RemoveNewLine(buffer, password_length);	// removes last character from password - '/'
-
-        UpdateStats(&(arguments.stats), buffer, --password_length);	// update stats with new password
+        // update stats with new password
+        // password_length should decrease by one
+        UpdateStats(&(stats), buffer, --password_length);	// update stats with new password
 
         passed = PasswordPassed(buffer, password_length, arguments.level.value, arguments.param.value);	// PasswordPassed determines if password has passed
         if (passed) {	// if password passed, print it 
             printf("%s\n", buffer);
         }
     }
-    // update stats with new password
 
-    arguments.stats.average_length =
-        (double)arguments.stats.total_length /
-        (double)arguments.stats.num_words;
+    stats.average_length =
+        (double)stats.total_length /
+        (double)stats.num_words;
 
-    CountDistinctCharacters(&(arguments.stats));
+    CountDistinctCharacters(&(stats));
 
     // print stats at the end
-    PrintStats(arguments.stats);
+    PrintStats(stats);
     return 0;
 }
 
@@ -661,7 +656,7 @@ int CheckPasswordsWOStats(struct Arguments arguments)
             return 1;
         }
         RemoveNewLine(buffer, password_length);	// remove last character from password - '\n'
-
+        // password_length should decrease by one
         passed = PasswordPassed(buffer, --password_length, arguments.level.value, arguments.param.value);	// PasswordPassed determines if password has passed
         if (passed) {	// if password passed, print it
             printf("%s\n", buffer);

@@ -615,55 +615,55 @@ void PrintStats(struct Stats stats)
 int CheckPasswordsWStats(struct Arguments arguments)
 {
 
-    char buffer[BUFFER_LENGTH];	// buffer pre nacitavanie hesiel 
-    uint password_length;	// dlzka nacitaneho hesla
-    bool passed;		// premenna urcujuca ci heslo preslo danym poctom pravidiel
+    char buffer[BUFFER_LENGTH];	// buffer for storing passwords
+    uint password_length;	
+    bool passed;		// variable determining whether a password passed all rules
 
-    // pokial je na vstupe heslo, nacitame ho do buffera
     while (fgets(buffer, BUFFER_LENGTH, stdin)) {
         password_length = StringLength(buffer);
         if (password_length == BUFFER_LENGTH) {
-            fprintf(stderr, "Password is too long, invalid input");
+            fprintf(stderr, "Password is too long, invalid input\n");
             return 1;
         }
 
-        RemoveNewLine(buffer, password_length);	// odstranime z hesla posledny charakter - '\n'
+        RemoveNewLine(buffer, password_length);	// removes last character from password - '/'
 
-        UpdateStats(&(arguments.stats), buffer, --password_length);	// updateneme statistiky s novym heslom
+        UpdateStats(&(arguments.stats), buffer, --password_length);	// update stats with new password
 
-        passed = PasswordPassed(buffer, password_length, arguments.level.value, arguments.param.value);	// funkcia PasswordPassed nam povie ci heslo preslo pravidlami
-        if (passed) {	// ak heslo preslo pravidlami, tak ho vypiseme
+        passed = PasswordPassed(buffer, password_length, arguments.level.value, arguments.param.value);	// PasswordPassed determines if password has passed
+        if (passed) {	// if password passed, print it 
             printf("%s\n", buffer);
         }
     }
-    // aktualizujeme premiernu dlzku hesla 
+    // update stats with new password
+
     arguments.stats.average_length =
         (double)arguments.stats.total_length /
         (double)arguments.stats.num_words;
 
     CountDistinctCharacters(&(arguments.stats));
 
-    // na zaver vypiseme statistiku
+    // print stats at the end
     PrintStats(arguments.stats);
     return 0;
 }
 
 int CheckPasswordsWOStats(struct Arguments arguments)
 {
-    char buffer[BUFFER_LENGTH];	// buffer pre nacitavanie hesiel 
-    uint password_length;	// dlzka nacitaneho hesla
-    bool passed;		// premenna urcujuca ci heslo preslo danym poctom pravidiel
+    char buffer[BUFFER_LENGTH];	// buffer for storing passwords
+    uint password_length;	
+    bool passed;		// variable determining whether a password passed all rules
 
-    while (fgets(buffer, BUFFER_LENGTH, stdin)) {	// nacitame heslo do buffera
+    while (fgets(buffer, BUFFER_LENGTH, stdin)) { 
         password_length = StringLength(buffer);
         if (password_length >= MAX_PASSWORD_LENGTH) {
-            fprintf(stderr, "Prilis velka dlzka hesla\n");
+            fprintf(stderr, "Password too long, invalid input\n");
             return 1;
         }
-        RemoveNewLine(buffer, password_length);	// odstranime z hesla posledny charakter - '\n'
+        RemoveNewLine(buffer, password_length);	// remove last character from password - '\n'
 
-        passed = PasswordPassed(buffer, --password_length, arguments.level.value, arguments.param.value);	// funkcia PasswordPassed nam povie ci heslo preslo pravidlami
-        if (passed) {	// ak heslo preslo pravidlami, tak ho vypiseme
+        passed = PasswordPassed(buffer, --password_length, arguments.level.value, arguments.param.value);	// PasswordPassed determines if password has passed
+        if (passed) {	// if password passed, print it
             printf("%s\n", buffer);
         }
     }
