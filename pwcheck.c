@@ -662,5 +662,6 @@ int CheckPasswordsWOStats(struct Arguments arguments)
             printf("%s\n", buffer);
         }
     }
+
     return 0;
 }
