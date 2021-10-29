@@ -32,14 +32,14 @@ typedef unsigned int uint;
 typedef unsigned long ulong;
 
 struct Level {
-	uint value;
-	uint min_value;
-	uint max_value;
+	int value;
+	int min_value;
+	int max_value;
 };
 
 struct Param {
-	ulong value;
-	uint min_value;
+	long value;
+	int min_value;
 };
 
 struct Stats {
@@ -76,7 +76,6 @@ struct Arguments CheckArguments(int argc, const char **argv);	// function loads 
 struct Level CreateDefaultLevel();	// function returns struct Level with default values
 struct Param CreateDefaultParam();	// function returns struct Param with default values
 struct Arguments IncorrectArguments(struct Arguments arguments, const char *message);	// function returns struct Arguments with attribute correct = false and prints a warning message
-struct Arguments CreateArguments(int, const char **);
 
 // Helper functions
 uint StringLength(const char *string);	// functions returns length of string
@@ -157,7 +156,7 @@ bool CorrectParamArgument(const char *string_param, struct Param param)
 	if (!IsNumber(string_param)) {
 		return false;
 	}
-	uint param_int = atoi(string_param);
+	int param_int = atoi(string_param);
 	if (param_int < param.min_value) {
 		return false;
 	}
@@ -342,16 +341,6 @@ struct Arguments CheckArguments(int argc, const char **argv)
 		sprintf(error_message, "Unknown argument %s", argv[1]);
 		return IncorrectArguments(arguments, error_message);
 	}
-}
-
-struct Arguments CreateArguments(int argc, const char **argv)
-{
-	struct Arguments arguments;
-
-	arguments.level.value = atoi(argv[1]);
-	arguments.param.value = atoi(argv[2]);
-
-	return arguments;
 }
 
 uint StringLength(const char *string)
